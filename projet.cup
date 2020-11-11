@@ -1,0 +1,123 @@
+// Specification JCup
+import java.util.HashMap; 
+import java_cup.runtime.*;
+
+parser code {:
+	public static void main(String args[]) throws Exception {
+		new parser(new Yylex(System.in)).parse();
+	}
+:}
+action code {:
+ HashMap<String, String> variables = new HashMap<String, String>();
+
+ String tableau ="";
+ String key="";
+ Integer k = 0;
+:}
+
+terminal String ADD;
+terminal String SOU;
+terminal String MUL;
+terminal String DIV;
+terminal String PO;
+terminal String PF;
+terminal Integer NB;
+terminal String ID;
+terminal String EGAL;
+terminal String VIRG;
+terminal String ACCOU;
+terminal String ACCFE;
+terminal String AT;
+terminal String CLR;
+terminal String print;
+
+
+non terminal expr;
+non terminal TAB;
+non terminal Integer E;
+
+
+
+precedence left ADD, SOU;
+precedence left MUL, DIV;
+precedence left VIRG;
+
+expr ::= ID:i {: key = i ; :}  EGAL  E:e {: 
+
+variables.put(key , ""+e) ;
+		
+          :} expr   {:   
+		 
+		   :}   // initialisation avec identificateur
+
+|  CLR  {: 
+    if (key != "" && tableau!=""){
+    String f =new StringBuilder("}"+tableau+"{").reverse().toString();
+    variables.put(key , f) ;
+    tableau="";
+	key="";}
+	 :} expr    
+
+
+
+| E:e expr:ex 
+
+
+|ACCOU TAB ACCFE expr {:
+      // String f =new StringBuilder("}"+tableau+"{").reverse().toString();  // initialisation tableau sans identificateur
+  :}
+  
+  
+  
+| AT:a {:
+  key = a ;   
+  
+    
+:} EGAL ACCOU TAB:t ACCFE expr 
+ 
+ 
+ 
+        
+
+| {: System.out.println(" la fin"  ) ;:} | print {: 	System.out.println( variables  ) ;   :} expr ;
+	
+
+
+TAB ::= E:e1 VIRG:v TAB  
+                   {:tableau+=",";tableau += e1;   :} |  
+        E:e2  {:
+	        tableau += e2 ; 
+// String f =new StringBuilder("}"+tableau+"{").reverse().toString();
+//variables.put(key,tableau); 
+ //tableau="";
+  //key="";
+  //System.out.println(variables ) ; 
+
+:}  ;
+
+E ::= E:e1 ADD E:e2 {:
+	//System.out.println(e1+" + "+e2);
+	RESULT = e1+e2;
+:} | E:e1 SOU E:e2 {:
+	//System.out.println(e1+" - "+e2);
+	RESULT = e1-e2;
+:} | E:e1 MUL E:e2 {:
+	//System.out.println(e1+" x "+e2);
+	RESULT = e1*e2;
+:} | E:e1 DIV E:e2 {:
+	//System.out.println(e1+" / "+e2);
+	RESULT = e1/e2;
+:} | PO E:e PF {:
+	//System.out.println("("+ e +")");
+	RESULT = (e);
+:} | NB:n {:
+
+	RESULT = n;
+	
+:};
+
+
+
+
+
+
